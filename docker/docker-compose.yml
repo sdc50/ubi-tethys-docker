@@ -1,0 +1,25 @@
+version: "3.2"
+services:
+  tethys:
+    container_name: tethyscore
+    image: tethysplatform/tethys-core
+    build:
+      cache_from:
+        - tethysplatform/tethys-core
+      context: ../
+    ports:
+      - "80:80"
+    environment:
+      TETHYS_DB_SUPERUSER: "tethys_super"
+      TETHYS_DB_SUPERUSER_PASS: "pass"
+      CLIENT_MAX_BODY_SIZE: "75M"
+    links:
+      - db
+    depends_on:
+      - db
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "pass"
