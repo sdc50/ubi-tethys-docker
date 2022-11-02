@@ -2,7 +2,7 @@
 {% set ALLOWED_HOSTS = salt['environ.get']('ALLOWED_HOSTS') %}
 {% set CONDA_ENV_NAME = salt['environ.get']('CONDA_ENV_NAME') %}
 {% set CONDA_HOME = salt['environ.get']('CONDA_HOME') %}
-{% set NGINX_USER = salt['environ.get']('NGINX_USER') %}
+{% set APACHE_USER = salt['environ.get']('APACHE_USER') %}
 {% set CLIENT_MAX_BODY_SIZE = salt['environ.get']('CLIENT_MAX_BODY_SIZE') %}
 {% set ASGI_PROCESSES = salt['environ.get']('ASGI_PROCESSES') %}
 {% set TETHYS_BIN_DIR = [CONDA_HOME, "/envs/", CONDA_ENV_NAME, "/bin"]|join %}
@@ -98,14 +98,14 @@ Generate_Tethys_Settings_TethysCore:
         {{ OTHER_SETTINGS }}
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 
-Generate_NGINX_Settings_TethysCore:
+Generate_Apache_Settings_TethysCore:
   cmd.run:
-    - name: tethys gen nginx --client-max-body-size {{ CLIENT_MAX_BODY_SIZE }} --overwrite
+    - name: tethys gen apache --client-max-body-size {{ CLIENT_MAX_BODY_SIZE }} --overwrite
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 
-Generate_NGINX_Service_TethysCore:
+Generate_Apache_Service_TethysCore:
   cmd.run:
-    - name: tethys gen nginx_service --overwrite
+    - name: tethys gen apache_service --overwrite
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 
 Generate_ASGI_Service_TethysCore:
@@ -120,14 +120,14 @@ Generate_ASGI_Service_TethysCore:
 
 /run/asgi:
   file.directory:
-    - user: {{ NGINX_USER }}
-    - group: {{ NGINX_USER }}
+    - user: {{ APACHE_USER }}
+    - group: {{ APACHE_USER }}
     - mode: 755
     - makedirs: True
 
 /var/log/tethys/tethys.log:
   file.managed:
-    - user: {{ NGINX_USER }}
+    - user: {{ APACHE_USER }}
     - replace: False
     - makedirs: True
 

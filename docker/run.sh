@@ -54,7 +54,7 @@ echo "postgres.bins_dir: '${CONDA_HOME}/envs/${CONDA_ENV_NAME}/bin'" >> /etc/sal
 
 if [[ $test = false ]]; then
   # Set extra ENVs
-  export NGINX_USER=$(grep 'user .*;' /etc/nginx/nginx.conf | awk '{print $2}' | awk -F';' '{print $1}')
+  export APACHE_USER=$(grep 'User ' /etc/httpd/conf/httpd.conf | awk '{print $2}')
 
   # Apply States
   echo_status "Checking if DB is ready"
@@ -78,11 +78,11 @@ salt-call --local state.apply
 if [[ $test = false ]]; then
   if [[ $skip_perm = false ]]; then
     echo_status "Fixing permissions"
-    find ${STATIC_ROOT} ! -user ${NGINX_USER} -print0 | xargs -0 -I{} chown ${NGINX_USER}: {}
-    find ${WORKSPACE_ROOT} ! -user ${NGINX_USER} -print0 | xargs -0 -I{} chown ${NGINX_USER}: {}
-    find ${TETHYS_PERSIST} ! -user ${NGINX_USER} -print0 | xargs -0 -I{} chown ${NGINX_USER}: {}
-    find ${TETHYSAPP_DIR} ! -user ${NGINX_USER} -print0 | xargs -0 -I{} chown ${NGINX_USER}: {}
-    find ${TETHYS_HOME} ! -user ${NGINX_USER} -print0 | xargs -0 -I{} chown ${NGINX_USER}: {}
+    find ${STATIC_ROOT} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
+    find ${WORKSPACE_ROOT} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
+    find ${TETHYS_PERSIST} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
+    find ${TETHYSAPP_DIR} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
+    find ${TETHYS_HOME} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
   fi
 
   echo_status "Starting supervisor"
@@ -94,6 +94,6 @@ if [[ $test = false ]]; then
 
   # Watch Logs
   echo_status "Watching logs"
-  tail -qF /var/log/supervisor/* /var/log/nginx/* /var/log/tethys/*
+  tail -qF /var/log/supervisor/* /var/log/httpd/* /var/log/tethys/*
 fi
 

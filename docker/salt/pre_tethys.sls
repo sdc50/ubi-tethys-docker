@@ -23,7 +23,7 @@ Create_Workspace_Root_On_Mounted_Pre_Tethys:
 Chown_Static_Workspaces_On_Mounted_Pre_Tethys:
   cmd.run:
     - name: >
-        export NGINX_USER=$(grep 'user .*;' /etc/nginx/nginx.conf | awk '{print $2}' | awk -F';' '{print $1}') ;
-        find {{ WORKSPACE_ROOT }} ! -user ${NGINX_USER} -print0 | xargs -0 -I{} chown ${NGINX_USER}: {} ;
-        find {{ STATIC_ROOT }} ! -user ${NGINX_USER} -print0 | xargs -0 -I{} chown ${NGINX_USER}: {}
+        export APACHE_USER=$(grep 'User ' /etc/httpd/conf/httpd.conf | awk '{print $2}') ;
+        find {{ WORKSPACE_ROOT }} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {} ;
+        find {{ STATIC_ROOT }} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
     - shell: /bin/bash

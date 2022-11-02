@@ -17,7 +17,7 @@ Restore_Portal_Config_Post_App:
 
 Chown_Portal_Config_Post_App:
   cmd.run:
-    - name: chown www:www {{ TETHYS_HOME }}/portal_config.yml
+    - name: chown apache:apache {{ TETHYS_HOME }}/portal_config.yml
     - shell: /bin/bash
 
 Collect_Static:
@@ -30,28 +30,28 @@ Collect_Workspaces:
     - name: tethys manage collectworkspaces
     - shell: /bin/bash
 
-Persist_NGINX_Config_Post_App:
+Persist_Apache_Config_Post_App:
   file.rename:
-    - source: {{ TETHYS_HOME }}/tethys_nginx.conf
-    - name: {{ TETHYS_PERSIST }}/tethys_nginx.conf
-    - unless: /bin/bash -c "[ -f "${TETHYS_PERSIST}/tethys_nginx.conf" ];"
+    - source: {{ TETHYS_HOME }}/tethys_apache.conf
+    - name: {{ TETHYS_PERSIST }}/tethys_apache.conf
+    - unless: /bin/bash -c "[ -f "${TETHYS_PERSIST}/tethys_apache.conf" ];"
 
-Link_NGINX_Config_Post_App:
+Link_Apache_Config_Post_App:
   file.symlink:
-    - name: /etc/nginx/sites-enabled/tethys_nginx.conf
-    - target: {{ TETHYS_PERSIST }}/tethys_nginx.conf
+    - name: /etc/httpd/conf.d/tethys_apache.conf
+    - target: {{ TETHYS_PERSIST }}/tethys_apache.conf
     - force: True
 
-Persist_NGINX_Supervisor_Post_App:
+Persist_Apache_Supervisor_Post_App:
   file.rename:
-    - source: {{ TETHYS_HOME }}/nginx_supervisord.conf
-    - name: {{ TETHYS_PERSIST }}/nginx_supervisord.conf
-    - unless: /bin/bash -c "[ -f "${TETHYS_PERSIST}/nginx_supervisord.conf" ];"
+    - source: {{ TETHYS_HOME }}/apache_supervisord.conf
+    - name: {{ TETHYS_PERSIST }}/apache_supervisord.conf
+    - unless: /bin/bash -c "[ -f "${TETHYS_PERSIST}/apache_supervisord.conf" ];"
 
-Link_NGINX_Supervisor_Post_App:
+Link_Apache_Supervisor_Post_App:
   file.symlink:
-    - name: /etc/supervisor/conf.d/nginx_supervisord.conf
-    - target: {{ TETHYS_PERSIST }}/nginx_supervisord.conf
+    - name: /etc/supervisord.d/apache_supervisord.ini
+    - target: {{ TETHYS_PERSIST }}/apache_supervisord.conf
     - force: True
 
 Persist_ASGI_Supervisor_Post_App:
@@ -62,11 +62,11 @@ Persist_ASGI_Supervisor_Post_App:
 
 Link_ASGI_Supervisor_Post_App:
   file.symlink:
-    - name: /etc/supervisor/conf.d/asgi_supervisord.conf
+    - name: /etc/supervisord.d/asgi_supervisord.ini
     - target: {{ TETHYS_PERSIST }}/asgi_supervisord.conf
     - force: True
 
 Tethys_Persist_Permissions:
   cmd.run:
-    - name: "chown -R www: {{ TETHYS_PERSIST }} && chmod -R g+rw {{ TETHYS_PERSIST }}"
+    - name: "chown -R apache: {{ TETHYS_PERSIST }} && chmod -R g+rw {{ TETHYS_PERSIST }}"
     - shell: /bin/bash

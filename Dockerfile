@@ -134,11 +134,9 @@ RUN micromamba create -n "${CONDA_ENV_NAME}" --yes -c conda-forge -c tethysplatf
 RUN mkdir -p ${TETHYS_PERSIST} ${TETHYS_APPS_ROOT} ${WORKSPACE_ROOT} ${STATIC_ROOT} ${TETHYS_LOG}
 
 # Setup www user, run supervisor and nginx processes as www user
-#RUN groupadd www \
-#  ; useradd -r -u 1011 -g www www \
-#  ; sed -i 's/^user.*/user www www;/' /etc/nginx/nginx.conf \
-#  ; sed -i "/^\[supervisord\]$/a user=www" /etc/supervisor/supervisord.conf \
-#  ; chown -R www: ${TETHYS_LOG} /run /var/log/supervisor /var/log/nginx /var/lib/nginx
+RUN sed -i "/^\[supervisord\]$/a user=apache" /etc/supervisord.conf \
+  ; chown -R apache: ${TETHYS_LOG} /run /var/log/supervisor /var/log/httpd /var/lib/httpd
+
 
 
 # Run Installer
@@ -151,7 +149,7 @@ RUN pip install channels_redis
 ############
 # CLEAN UP #
 ############
- RUN dnf -y remove gcc \
+ RUN dnf -y remove gcc git \
   ; dnf -y autoremove \
   ; dnf -y clean all
 
@@ -176,6 +174,6 @@ WORKDIR ${TETHYS_HOME}
 CMD bash run.sh
 HEALTHCHECK --start-period=240s \
   CMD  function check_process_is_running(){ if [ "$(ps $1 | wc -l)" -ne 2 ]; then echo The $2 process \($1\) is  not running. 1>&2; return 1; fi }; \
-  check_process_is_running $(cat $(grep 'pidfile=.*' /etc/supervisor/supervisord.conf | awk -F'=' '{print $2}' | awk '{print $1}')) supervisor; \
-  check_process_is_running $(cat $(grep 'pid .*;' /etc/nginx/nginx.conf | awk '{print $2}' | awk -F';' '{print $1}')) nginx; \
+  check_process_is_running $(cat $(grep 'pidfile=.*' /etc/supervisord.conf | awk -F'=' '{print $2}' | awk '{print $1}')) supervisor; \
+  check_process_is_running $(cat $(grep "PidFile " /etc/httpd/conf/httpd.conf || echo $(grep 'ServerRoot "' /etc/httpd/conf/httpd.conf | awk -F'"' '{print $2}')/logs/httpd.pid)) apache; \
   check_process_is_running $(ls -l /run/tethys_asgi0.sock.lock | awk -F'-> ' '{print $2}') asgi;
