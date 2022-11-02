@@ -87,6 +87,8 @@ if [[ $test = false ]]; then
 
   echo_status "Starting supervisor"
 
+  # temporary fix for apache user
+  sed -i "/^user=.*$/a user=apache" /etc/supervisord.d/apache_supervisord.ini
   # Start Supervisor
   /usr/bin/supervisord $([[ $no_daemon = true ]] && printf %s "-n")
 
