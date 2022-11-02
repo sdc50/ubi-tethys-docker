@@ -1,4 +1,4 @@
-FROM ubi-micromamba
+FROM ironbank-ubi-micromamba
 ###################
 # BUILD ARGUMENTS #
 ###################
