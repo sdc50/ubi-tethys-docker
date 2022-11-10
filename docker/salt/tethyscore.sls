@@ -14,7 +14,8 @@
 {% set TETHYS_DB_USERNAME = salt['environ.get']('TETHYS_DB_USERNAME') %}
 {% set TETHYS_HOME = salt['environ.get']('TETHYS_HOME') %}
 {% set TETHYS_PORT = salt['environ.get']('TETHYS_PORT') %}
-{% set TETHYS_PUBLIC_HOST = salt['environ.get']('TETHYS_PUBLIC_HOST') %}
+{% set APACHE_SSL_CERT_FILE = salt['environ.get']('APACHE_SSL_CERT_FILE') %}
+{% set APACHE_SSL_KEY_FILE = salt['environ.get']('APACHE_SSL_KEY_FILE') %}
 {% set OTHER_SETTINGS = salt['environ.get']('OTHER_SETTINGS') %}
 {% set TETHYS_DB_SUPERUSER = salt['environ.get']('TETHYS_DB_SUPERUSER') %}
 {% set TETHYS_DB_SUPERUSER_PASS = salt['environ.get']('TETHYS_DB_SUPERUSER_PASS') %}
@@ -94,13 +95,18 @@ Generate_Tethys_Settings_TethysCore:
         --set CHANNEL_LAYERS.default.CONFIG {{ CHANNEL_LAYERS_CONFIG }}
         --set CAPTCHA_CONFIG.RECAPTCHA_PRIVATE_KEY {{ RECAPTCHA_PRIVATE_KEY }}
         --set CAPTCHA_CONFIG.RECAPTCHA_PUBLIC_KEY {{ RECAPTCHA_PUBLIC_KEY }}
-        --set TETHYS_PUBLIC_HOST {{ TETHYS_PUBLIC_HOST }}
         {{ OTHER_SETTINGS }}
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 
 Generate_Apache_Settings_TethysCore:
   cmd.run:
-    - name: tethys gen apache --client-max-body-size {{ CLIENT_MAX_BODY_SIZE }} --overwrite
+    - name: >
+        tethys gen apache
+        --ssl
+        --ssl_cert {{ APACHE_SSL_CERT_FILE }}
+        --ssl_key {{ APACHE_SSL_KEY_FILE }}
+        --tethys-port {{ TETHYS_PORT }}
+        --overwrite
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 
 Generate_Apache_Service_TethysCore:

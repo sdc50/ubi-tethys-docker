@@ -1,4 +1,6 @@
-FROM ironbank-ubi-micromamba
+ARG FROM_IMAGE=tethysplatform/ubi-micromamba
+
+FROM ${FROM_IMAGE}
 ###################
 # BUILD ARGUMENTS #
 ###################
@@ -24,8 +26,8 @@ ENV PORTAL_SUPERUSER_NAME=""
 ENV PORTAL_SUPERUSER_EMAIL=""
 ENV PORTAL_SUPERUSER_PASSWORD=""
 ENV TETHYS_MANAGE="${TETHYS_HOME}/tethys/tethys_portal/manage.py"
-ENV TETHYS_PUBLIC_HOST="http://localhost"
-
+ENV APACHE_SSL_CERT_FILE="${TETHYS_PERSIST}/server.crt"
+ENV APACHE_SSL_KEY_FILE="${TETHYS_PERSIST}/server.key"
 
 # Misc
 ENV BASH_PROFILE=".bashrc"
@@ -42,7 +44,7 @@ ENV BYPASS_TETHYS_HOME_PAGE="True"
 ENV ADD_DJANGO_APPS="\"[]\""
 ENV SESSION_WARN=1500
 ENV SESSION_EXPIRE=1800
-ENV STATIC_ROOT="${TETHYS_PERSIST}/static/"
+ENV STATIC_ROOT="${TETHYS_PERSIST}/static"
 ENV WORKSPACE_ROOT="${TETHYS_PERSIST}/workspaces"
 ENV QUOTA_HANDLERS="\"[]\""
 ENV DJANGO_ANALYTICAL="\"{}\""
@@ -105,21 +107,17 @@ USER root
 RUN mkdir -p "${TETHYS_HOME}/tethys"
 WORKDIR ${TETHYS_HOME}
 
-# Speed up APT installs
-# RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup \
-#   ; echo "Acquire::http {No-Cache=True;};" > /etc/apt/apt.conf.d/no-cache
-
 # Install APT packages
 RUN rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8 \
  && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
  && rpm --import https://repo.saltproject.io/salt/py3/redhat/8/x86_64/latest/SALTSTACK-GPG-KEY.pub \
  && curl -fsSL https://repo.saltproject.io/salt/py3/redhat/8/x86_64/latest.repo | tee /etc/yum.repos.d/salt.repo \
  && dnf update -y \
- && dnf -y install bzip2 git httpd supervisor gcc salt-minion procps pv \
+ && dnf -y install bzip2 httpd mod_ssl supervisor salt-minion procps pv \
  && dnf clean all
 
-# Remove default NGINX site
-# RUN rm -f /etc/nginx/sites-enabled/default
+# Remove default Apache site
+RUN rm -f /etc/httpd/conf.d/ssl.conf
 
 # Setup Conda Environment
 WORKDIR ${TETHYS_HOME}/tethys
@@ -137,8 +135,6 @@ RUN mkdir -p ${TETHYS_PERSIST} ${TETHYS_APPS_ROOT} ${WORKSPACE_ROOT} ${STATIC_RO
 RUN sed -i "/^\[supervisord\]$/a user=apache" /etc/supervisord.conf \
   ; chown -R apache: ${TETHYS_LOG} /run /var/log/supervisor /var/log/httpd /var/lib/httpd
 
-
-
 # Run Installer
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 RUN tethys gen portal_config
@@ -149,8 +145,7 @@ RUN pip install channels_redis
 ############
 # CLEAN UP #
 ############
- RUN dnf -y remove gcc git \
-  ; dnf -y autoremove \
+ RUN dnf -y autoremove \
   ; dnf -y clean all
 
 #########################

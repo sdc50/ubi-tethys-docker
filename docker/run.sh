@@ -87,8 +87,11 @@ if [[ $test = false ]]; then
 
   echo_status "Starting supervisor"
 
-  # temporary fix for apache user
-  sed -i "/^user=.*$/a user=apache" /etc/supervisord.d/apache_supervisord.ini
+  openssl req -newkey rsa:2048 -keyout ${APACHE_SSL_KEY_FILE} -x509 -days 365 -out ${APACHE_SSL_CERT_FILE} -nodes -subj "/C=US/ST=UT/L=Provo/O=Tethys Foundation/CN=localhost"
+  chown ${APACHE_USER}: ${APACHE_SSL_KEY_FILE} ${APACHE_SSL_CERT_FILE}
+
+  # extra scripts
+
   # Start Supervisor
   /usr/bin/supervisord $([[ $no_daemon = true ]] && printf %s "-n")
 
