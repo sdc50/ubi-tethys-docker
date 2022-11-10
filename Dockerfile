@@ -1,6 +1,6 @@
-ARG FROM_IMAGE=tethysplatform/ubi-micromamba
+ARG BASE_IMAGE=tethysplatform/ubi-micromamba
 
-FROM ${FROM_IMAGE}
+FROM ${BASE_IMAGE}
 ###################
 # BUILD ARGUMENTS #
 ###################
