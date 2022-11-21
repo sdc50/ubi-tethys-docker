@@ -65,8 +65,3 @@ Link_ASGI_Supervisor_Post_App:
     - name: /etc/supervisord.d/asgi_supervisord.ini
     - target: {{ TETHYS_PERSIST }}/asgi_supervisord.conf
     - force: True
-
-Tethys_Persist_Permissions:
-  cmd.run:
-    - name: "chown -R apache: {{ TETHYS_PERSIST }} && chmod -R g+rw {{ TETHYS_PERSIST }}"
-    - shell: /bin/bash

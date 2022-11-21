@@ -14,8 +14,13 @@
 {% set TETHYS_DB_USERNAME = salt['environ.get']('TETHYS_DB_USERNAME') %}
 {% set TETHYS_HOME = salt['environ.get']('TETHYS_HOME') %}
 {% set TETHYS_PORT = salt['environ.get']('TETHYS_PORT') %}
+{% set BYPASS_TETHYS_HOME_PAGE = salt['environ.get']('BYPASS_TETHYS_HOME_PAGE') %}
+{% set USE_SSL = salt['environ.get']('USE_SSL') %}
 {% set APACHE_SSL_CERT_FILE = salt['environ.get']('APACHE_SSL_CERT_FILE') %}
 {% set APACHE_SSL_KEY_FILE = salt['environ.get']('APACHE_SSL_KEY_FILE') %}
+{% set RUN_PROXY_SERVER_AS_USER = salt['environ.get']('RUN_PROXY_SERVER_AS_USER') %}
+{% set PROXY_SERVER_PORT = salt['environ.get']('PROXY_SERVER_PORT') %}
+{% set PROXY_SERVER_ADDITIONAL_DIRECTIVES = salt['environ.get']('PROXY_SERVER_ADDITIONAL_DIRECTIVES') %}
 {% set OTHER_SETTINGS = salt['environ.get']('OTHER_SETTINGS') %}
 {% set TETHYS_DB_SUPERUSER = salt['environ.get']('TETHYS_DB_SUPERUSER') %}
 {% set TETHYS_DB_SUPERUSER_PASS = salt['environ.get']('TETHYS_DB_SUPERUSER_PASS') %}
@@ -87,6 +92,7 @@ Generate_Tethys_Settings_TethysCore:
         --set SESSION_CONFIG.SECURITY_EXPIRE_AFTER {{ SESSION_EXPIRE }}
         --set TETHYS_PORTAL_CONFIG.STATIC_ROOT {{ STATIC_ROOT }}
         --set TETHYS_PORTAL_CONFIG.TETHYS_WORKSPACES_ROOT {{ WORKSPACE_ROOT }}
+        --set TETHYS_PORTAL_CONFIG.BYPASS_TETHYS_HOME_PAGE {{ BYPASS_TETHYS_HOME_PAGE }}
         --set RESOURCE_QUOTA_HANDLERS {{ QUOTA_HANDLERS }}
         --set ANALYTICS_CONFIG {{ DJANGO_ANALYTICAL }}
         --set AUTHENTICATION_BACKENDS {{ ADD_BACKENDS }}
@@ -102,16 +108,37 @@ Generate_Apache_Settings_TethysCore:
   cmd.run:
     - name: >
         tethys gen apache
+        {%- if USE_SSL %}
         --ssl
-        --ssl_cert {{ APACHE_SSL_CERT_FILE }}
-        --ssl_key {{ APACHE_SSL_KEY_FILE }}
+        --ssl-cert-path {{ APACHE_SSL_CERT_FILE }}
+        --ssl-key-path {{ APACHE_SSL_KEY_FILE }}
+        {%- endif %}
         --tethys-port {{ TETHYS_PORT }}
+        {%- if PROXY_SERVER_PORT %}
+        --web-server-port {{ PROXY_SERVER_PORT }}
+        {%- endif %}
+        --ip-address $(sed -n '$p'  /etc/hosts | awk '{print $1}')
         --overwrite
+        {{ PROXY_SERVER_ADDITIONAL_DIRECTIVES }}
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
+
+Generate_SSL_Certificate_Key_Pair_TethysCore:
+  cmd.run:
+    - name: >
+        openssl req
+        -newkey rsa:2048
+        -keyout {{ APACHE_SSL_KEY_FILE }}
+        -x509
+        -days 365
+        -out {{ APACHE_SSL_CERT_FILE }}
+        -nodes
+        -subj "/C=US/ST=UT/L=Provo/O=Tethys Foundation/CN=localhost"
+        && chown {{ APACHE_USER }}: {{ APACHE_SSL_KEY_FILE }} {{ APACHE_SSL_CERT_FILE }}
+    - unless: /bin/bash -c "[ {{ USE_SSL }} == false ] || ([ -f {{ APACHE_SSL_CERT_FILE }} ] && [ -f {{ APACHE_SSL_KEY_FILE }} ]);"
 
 Generate_Apache_Service_TethysCore:
   cmd.run:
-    - name: tethys gen apache_service --overwrite
+    - name: tethys gen apache_service --overwrite --run-as-user {{ RUN_PROXY_SERVER_AS_USER }}
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 
 Generate_ASGI_Service_TethysCore:

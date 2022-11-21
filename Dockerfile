@@ -5,6 +5,9 @@ FROM ${BASE_IMAGE}
 # BUILD ARGUMENTS #
 ###################
 ARG PYTHON_VERSION=3.*
+ARG RUN_SUPERVISOR_AS_USER="root"
+ARG TETHYS_VERSION="4.0"
+ARG TETHYS_CHANNEL="tethysplatform"
 
 ###############
 # ENVIRONMENT #
@@ -26,8 +29,19 @@ ENV PORTAL_SUPERUSER_NAME=""
 ENV PORTAL_SUPERUSER_EMAIL=""
 ENV PORTAL_SUPERUSER_PASSWORD=""
 ENV TETHYS_MANAGE="${TETHYS_HOME}/tethys/tethys_portal/manage.py"
+
+# Salt Scripts
+ENV SALT_SCRIPTS="pre_tethys:tethyscore:post_app"
+ENV ADDITIONAL_SALT_SCRIPTS=""
+
+# Proxy Server Config
 ENV APACHE_SSL_CERT_FILE="${TETHYS_PERSIST}/server.crt"
 ENV APACHE_SSL_KEY_FILE="${TETHYS_PERSIST}/server.key"
+ENV PROXY_SERVER_PORT=""
+ENV USE_SSL=false
+ENV RUN_PROXY_SERVER_AS_USER="root"
+ENV PROXY_SERVER_PORT=""
+ENV PROXY_SERVER_ADDITIONAL_DIRECTIVES=""
 
 # Misc
 ENV BASH_PROFILE=".bashrc"
@@ -121,8 +135,8 @@ RUN rm -f /etc/httpd/conf.d/ssl.conf
 
 # Setup Conda Environment
 WORKDIR ${TETHYS_HOME}/tethys
-RUN micromamba create -n "${CONDA_ENV_NAME}" --yes -c conda-forge -c tethysplatform/label/dev \
-    tethys-platform=4.0 python=${PYTHON_VERSION} \
+RUN micromamba create -n "${CONDA_ENV_NAME}" --yes -c conda-forge -c ${TETHYS_CHANNEL} \
+    tethys-platform=${TETHYS_VERSION} python=${PYTHON_VERSION} \
  && micromamba clean --all --yes
 
 ###########
@@ -132,7 +146,7 @@ RUN micromamba create -n "${CONDA_ENV_NAME}" --yes -c conda-forge -c tethysplatf
 RUN mkdir -p ${TETHYS_PERSIST} ${TETHYS_APPS_ROOT} ${WORKSPACE_ROOT} ${STATIC_ROOT} ${TETHYS_LOG}
 
 # Setup www user, run supervisor and nginx processes as www user
-RUN sed -i "/^\[supervisord\]$/a user=apache" /etc/supervisord.conf \
+RUN sed -i "/^\[supervisord\]$/a user=${RUN_SUPERVISOR_AS_USER}" /etc/supervisord.conf \
   ; chown -R apache: ${TETHYS_LOG} /run /var/log/supervisor /var/log/httpd /var/lib/httpd
 
 # Run Installer
@@ -153,7 +167,7 @@ RUN pip install channels_redis
 #########################
 ENV PATH ${CONDA_HOME}/miniconda/envs/tethys/bin:$PATH 
 VOLUME ["${TETHYS_HOME}/workspaces", "${TETHYS_HOME}/keys"]
-EXPOSE 80
+EXPOSE ${PROXY_SERVER_PORT}
 
 ###############*
 # COPY IN SALT #

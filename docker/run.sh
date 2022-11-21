@@ -52,6 +52,12 @@ echo "postgres.user: '${TETHYS_DB_USERNAME}'" >> /etc/salt/minion
 echo "postgres.pass: '${TETHYS_DB_PASSWORD}'" >> /etc/salt/minion
 echo "postgres.bins_dir: '${CONDA_HOME}/envs/${CONDA_ENV_NAME}/bin'" >> /etc/salt/minion
 
+# Create Salt top.sls file
+TOP_SLS=/srv/salt/top.sls
+echo -e "base:\n  '*':" > ${TOP_SLS}
+( IFS=:; for script_name in ${SALT_SCRIPTS}; do echo "    - $script_name" >> ${TOP_SLS}; done; )
+( IFS=:; for script_name in ${ADDITIONAL_SALT_SCRIPTS}; do echo "    - $script_name" >> ${TOP_SLS}; done; )
+
 if [[ $test = false ]]; then
   # Set extra ENVs
   export APACHE_USER=$(grep 'User ' /etc/httpd/conf/httpd.conf | awk '{print $2}')
@@ -86,11 +92,6 @@ if [[ $test = false ]]; then
   fi
 
   echo_status "Starting supervisor"
-
-  openssl req -newkey rsa:2048 -keyout ${APACHE_SSL_KEY_FILE} -x509 -days 365 -out ${APACHE_SSL_CERT_FILE} -nodes -subj "/C=US/ST=UT/L=Provo/O=Tethys Foundation/CN=localhost"
-  chown ${APACHE_USER}: ${APACHE_SSL_KEY_FILE} ${APACHE_SSL_CERT_FILE}
-
-  # extra scripts
 
   # Start Supervisor
   /usr/bin/supervisord $([[ $no_daemon = true ]] && printf %s "-n")
