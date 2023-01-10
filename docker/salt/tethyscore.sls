@@ -14,6 +14,7 @@
 {% set TETHYS_DB_USERNAME = salt['environ.get']('TETHYS_DB_USERNAME') %}
 {% set TETHYS_HOME = salt['environ.get']('TETHYS_HOME') %}
 {% set TETHYS_PORT = salt['environ.get']('TETHYS_PORT') %}
+{% set SKIP_DB_SETUP = salt['environ.get']('SKIP_DB_SETUP') %}
 {% set BYPASS_TETHYS_HOME_PAGE = salt['environ.get']('BYPASS_TETHYS_HOME_PAGE') %}
 {% set USE_SSL = salt['environ.get']('USE_SSL') %}
 {% set APACHE_SSL_CERT_FILE = salt['environ.get']('APACHE_SSL_CERT_FILE') %}
@@ -31,6 +32,8 @@
 {% set SESSION_WARN = salt['environ.get']('SESSION_WARN') %}
 {% set SESSION_EXPIRE = salt['environ.get']('SESSION_EXPIRE') %}
 {% set TETHYS_PERSIST = salt['environ.get']('TETHYS_PERSIST') %}
+{% set REGISTER_CONTROLLER = salt['environ.get']('REGISTER_CONTROLLER') %}
+{% set STATICFILES_USE_NPM = salt['environ.get']('STATICFILES_USE_NPM') %}
 {% set STATIC_ROOT = salt['environ.get']('STATIC_ROOT') %}
 {% set WORKSPACE_ROOT = salt['environ.get']('WORKSPACE_ROOT') %}
 {% set QUOTA_HANDLERS = salt['environ.get']('QUOTA_HANDLERS') %}
@@ -90,6 +93,7 @@ Generate_Tethys_Settings_TethysCore:
         --set INSTALLED_APPS {{ ADD_DJANGO_APPS }}
         --set SESSION_CONFIG.SECURITY_WARN_AFTER {{ SESSION_WARN }}
         --set SESSION_CONFIG.SECURITY_EXPIRE_AFTER {{ SESSION_EXPIRE }}
+        --set TETHYS_PORTAL_CONFIG.STATICFILES_USE_NPM {{ STATICFILES_USE_NPM }}
         --set TETHYS_PORTAL_CONFIG.STATIC_ROOT {{ STATIC_ROOT }}
         --set TETHYS_PORTAL_CONFIG.TETHYS_WORKSPACES_ROOT {{ WORKSPACE_ROOT }}
         --set TETHYS_PORTAL_CONFIG.BYPASS_TETHYS_HOME_PAGE {{ BYPASS_TETHYS_HOME_PAGE }}
@@ -103,6 +107,14 @@ Generate_Tethys_Settings_TethysCore:
         --set CAPTCHA_CONFIG.RECAPTCHA_PUBLIC_KEY {{ RECAPTCHA_PUBLIC_KEY }}
         {{ OTHER_SETTINGS }}
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
+
+
+Generate_Package_JSON_TethysCore:
+  cmd.run:
+    - name: >
+        micromamba -c conda-forge install nodejs -y
+        && tethys gen package_json
+    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$STATICFILES_USE_NPM" = true ];"
 
 Generate_Apache_Settings_TethysCore:
   cmd.run:
@@ -173,14 +185,14 @@ Create_Database_User_and_SuperUser_TethysCore:
         -N {{ TETHYS_DB_SUPERUSER }}
         -P {{ TETHYS_DB_SUPERUSER_PASS }}
     - shell: /bin/bash
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
+    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$SKIP_DB_SETUP" = true ];"
 
 Migrate_Database_TethysCore:
   cmd.run:
     - name: >
         tethys db migrate
     - shell: /bin/bash
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
+    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$SKIP_DB_SETUP" = true ];"
 
 Create_Database_Portal_SuperUser_TethysCore:
   cmd.run:
@@ -191,7 +203,13 @@ Create_Database_Portal_SuperUser_TethysCore:
         {% endif %}
         {%- if PORTAL_SUPERUSER_EMAIL %}--pe {{ PORTAL_SUPERUSER_EMAIL }}{% endif %}
     - shell: /bin/bash
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
+    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$SKIP_DB_SETUP" = true ];"
+
+{% if REGISTER_CONTROLLER %}
+Set_Register_Controller_TethysCore:
+  cmd.run:
+    - name: tethys settings -s TETHYS_PORTAL_CONFIG.REGISTER_CONTROLLER {{ REGISTER_CONTROLLER }}
+{% endif %}
 
 {% if TETHYS_SITE_CONTENT %}
 Modify_Tethys_Site_TethysCore:

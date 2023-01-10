@@ -7,6 +7,10 @@ services:
       cache_from:
         - tethysplatform/tethys-core
       context: ../
+      args:
+        BASE_IMAGE: harbor.erdc.dren.mil/rad/micromamba
+        TETHYS_CHANNEL: tethysplatform
+        TETHYS_VERSION: 4.0
     ports:
       - "80:80"
     environment:

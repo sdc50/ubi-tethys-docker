@@ -29,14 +29,16 @@ ENV PORTAL_SUPERUSER_NAME=""
 ENV PORTAL_SUPERUSER_EMAIL=""
 ENV PORTAL_SUPERUSER_PASSWORD=""
 ENV TETHYS_MANAGE="${TETHYS_HOME}/tethys/tethys_portal/manage.py"
+ENV WAIT_FOR_DB=true
+ENV SKIP_DB_SETUP=false
 
 # Salt Scripts
 ENV SALT_SCRIPTS="pre_tethys:tethyscore:post_app"
 ENV ADDITIONAL_SALT_SCRIPTS=""
 
 # Proxy Server Config
-ENV APACHE_SSL_CERT_FILE="${TETHYS_PERSIST}/server.crt"
-ENV APACHE_SSL_KEY_FILE="${TETHYS_PERSIST}/server.key"
+ENV APACHE_SSL_CERT_FILE="${TETHYS_PERSIST}/keys/server.crt"
+ENV APACHE_SSL_KEY_FILE="${TETHYS_PERSIST}/keys/server.key"
 ENV PROXY_SERVER_PORT=""
 ENV USE_SSL=false
 ENV RUN_PROXY_SERVER_AS_USER="root"
@@ -58,6 +60,8 @@ ENV BYPASS_TETHYS_HOME_PAGE="True"
 ENV ADD_DJANGO_APPS="\"[]\""
 ENV SESSION_WARN=1500
 ENV SESSION_EXPIRE=1800
+ENV STATICFILES_USE_NPM=true
+ENV REGISTER_CONTROLLER=null
 ENV STATIC_ROOT="${TETHYS_PERSIST}/static"
 ENV WORKSPACE_ROOT="${TETHYS_PERSIST}/workspaces"
 ENV QUOTA_HANDLERS="\"[]\""
@@ -118,7 +122,6 @@ ENV USER_SETTINGS_PAGE_TEMPLATE=""
 # SETUP #
 #########
 USER root
-RUN mkdir -p "${TETHYS_HOME}/tethys"
 WORKDIR ${TETHYS_HOME}
 
 # Install APT packages
@@ -165,8 +168,7 @@ RUN pip install channels_redis
 #########################
 # CONFIGURE  ENVIRONMENT#
 #########################
-ENV PATH ${CONDA_HOME}/miniconda/envs/tethys/bin:$PATH 
-VOLUME ["${TETHYS_HOME}/workspaces", "${TETHYS_HOME}/keys"]
+VOLUME ["${WORKSPACE_ROOT}", "${STATIC_ROOT}", "${TETHYS_PERSIST}/keys"]
 EXPOSE ${PROXY_SERVER_PORT}
 
 ###############*
