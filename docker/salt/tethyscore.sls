@@ -114,7 +114,7 @@ Generate_Package_JSON_TethysCore:
     - name: >
         micromamba -c conda-forge install nodejs -y
         && tethys gen package_json
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$STATICFILES_USE_NPM" = true ];"
+    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$STATICFILES_USE_NPM" = false ];"
 
 Generate_Apache_Settings_TethysCore:
   cmd.run:
@@ -192,7 +192,7 @@ Migrate_Database_TethysCore:
     - name: >
         tethys db migrate
     - shell: /bin/bash
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$SKIP_DB_SETUP" = true ];"
+    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 
 Create_Database_Portal_SuperUser_TethysCore:
   cmd.run:
