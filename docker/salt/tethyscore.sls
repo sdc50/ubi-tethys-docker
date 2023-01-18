@@ -112,7 +112,7 @@ Generate_Tethys_Settings_TethysCore:
 Generate_Package_JSON_TethysCore:
   cmd.run:
     - name: >
-        micromamba -c conda-forge install nodejs -y
+        micromamba install -c conda-forge nodejs -y
         && tethys gen package_json
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$STATICFILES_USE_NPM" = false ];"
 
