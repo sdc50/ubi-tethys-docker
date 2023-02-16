@@ -11,6 +11,8 @@
 {% set TETHYS_DB_PASSWORD = salt['environ.get']('TETHYS_DB_PASSWORD') %}
 {% set POSTGRES_PASSWORD = salt['environ.get']('POSTGRES_PASSWORD') %}
 {% set TETHYS_DB_PORT = salt['environ.get']('TETHYS_DB_PORT') %}
+{% set TETHYS_DB_ENGINE = salt['environ.get']('TETHYS_DB_ENGINE') %}
+{% set TETHYS_DB_OPTIONS = salt['environ.get']('TETHYS_DB_OPTIONS') %}
 {% set TETHYS_DB_USERNAME = salt['environ.get']('TETHYS_DB_USERNAME') %}
 {% set TETHYS_HOME = salt['environ.get']('TETHYS_HOME') %}
 {% set TETHYS_PORT = salt['environ.get']('TETHYS_PORT') %}
@@ -90,6 +92,10 @@ Generate_Tethys_Settings_TethysCore:
         --set DATABASES.default.PASSWORD {{ TETHYS_DB_PASSWORD }}
         --set DATABASES.default.HOST {{ TETHYS_DB_HOST }}
         --set DATABASES.default.PORT {{ TETHYS_DB_PORT }}
+        --set DATABASES.default.ENGINE {{ TETHYS_DB_ENGINE }}
+        {%- if TETHYS_DB_OPTIONS %}
+        --set DATABASES.default.OPTIONS {{ TETHYS_DB_OPTIONS }}
+        {%- endif %}
         --set INSTALLED_APPS {{ ADD_DJANGO_APPS }}
         --set SESSION_CONFIG.SECURITY_WARN_AFTER {{ SESSION_WARN }}
         --set SESSION_CONFIG.SECURITY_EXPIRE_AFTER {{ SESSION_EXPIRE }}
@@ -114,6 +120,7 @@ Generate_Package_JSON_TethysCore:
     - name: >
         micromamba install -c conda-forge nodejs -y
         && tethys gen package_json
+        && npm audit fix
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$STATICFILES_USE_NPM" = false ];"
 
 Generate_Apache_Settings_TethysCore:
@@ -192,7 +199,7 @@ Migrate_Database_TethysCore:
     - name: >
         tethys db migrate
     - shell: /bin/bash
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
+    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$SKIP_DB_SETUP" = true ];"
 
 Create_Database_Portal_SuperUser_TethysCore:
   cmd.run:
