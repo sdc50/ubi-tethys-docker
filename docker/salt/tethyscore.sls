@@ -221,7 +221,8 @@ Set_Register_Controller_TethysCore:
 {% if TETHYS_SITE_CONTENT %}
 Modify_Tethys_Site_TethysCore:
   cmd.run:
-    - name: tethys site {{ TETHYS_SITE_CONTENT }}
+    - name: |
+        tethys site {{ TETHYS_SITE_CONTENT }}
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 {% endif %}
 
