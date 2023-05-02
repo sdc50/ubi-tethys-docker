@@ -129,7 +129,7 @@ WORKDIR ${TETHYS_HOME}
 # Install APT packages
 RUN rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8 \
  && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
- && rpm --import https://repo.saltproject.io/salt/py3/redhat/8/x86_64/latest/SALTSTACK-GPG-KEY.pub \
+ && rpm --import https://repo.saltproject.io/salt/py3/redhat/8/x86_64/latest/SALT-PROJECT-GPG-PUBKEY-2023.pub \
  && curl -fsSL https://repo.saltproject.io/salt/py3/redhat/8/x86_64/latest.repo | tee /etc/yum.repos.d/salt.repo \
  && dnf update -y \
  && dnf -y install bzip2 httpd mod_ssl supervisor salt-minion procps pv \
