@@ -87,12 +87,12 @@ Generate_Tethys_Settings_TethysCore:
         tethys settings
         --set DEBUG {{ DEBUG }}
         --set ALLOWED_HOSTS {{ ALLOWED_HOSTS }}
+        --set DATABASES.default.ENGINE {{ TETHYS_DB_ENGINE }}
         --set DATABASES.default.NAME {{ TETHYS_DB_NAME }}
         --set DATABASES.default.USER {{ TETHYS_DB_USERNAME }}
         --set DATABASES.default.PASSWORD {{ TETHYS_DB_PASSWORD }}
         --set DATABASES.default.HOST {{ TETHYS_DB_HOST }}
         --set DATABASES.default.PORT {{ TETHYS_DB_PORT }}
-        --set DATABASES.default.ENGINE {{ TETHYS_DB_ENGINE }}
         {%- if TETHYS_DB_OPTIONS %}
         --set DATABASES.default.OPTIONS {{ TETHYS_DB_OPTIONS }}
         {%- endif %}
@@ -199,7 +199,7 @@ Migrate_Database_TethysCore:
     - name: >
         tethys db migrate
     - shell: /bin/bash
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$SKIP_DB_SETUP" = true ];"
+    - unless: /bin/bash -c "[ "$SKIP_DB_MIGRATE" = true ];"
 
 Create_Database_Portal_SuperUser_TethysCore:
   cmd.run:

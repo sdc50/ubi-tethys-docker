@@ -33,6 +33,7 @@ ENV PORTAL_SUPERUSER_PASSWORD=""
 ENV TETHYS_MANAGE="${TETHYS_HOME}/tethys/tethys_portal/manage.py"
 ENV WAIT_FOR_DB=true
 ENV SKIP_DB_SETUP=false
+ENV SKIP_DB_MIGRATE=false
 
 # Salt Scripts
 ENV SALT_SCRIPTS="pre_tethys:tethyscore:post_app"
