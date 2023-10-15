@@ -119,8 +119,7 @@ Generate_Package_JSON_TethysCore:
   cmd.run:
     - name: >
         micromamba install -c conda-forge nodejs -y
-        && tethys gen package_json
-        && npm audit fix
+        && tethys gen package_json --overwrite
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$STATICFILES_USE_NPM" = false ];"
 
 Generate_Apache_Settings_TethysCore:
@@ -136,7 +135,7 @@ Generate_Apache_Settings_TethysCore:
         {%- if PROXY_SERVER_PORT %}
         --web-server-port {{ PROXY_SERVER_PORT }}
         {%- endif %}
-        --ip-address $(sed -n '$p'  /etc/hosts | awk '{print $1}')
+        --ip-address $(hostname -I | awk '{print $1}')
         --overwrite
         {{ PROXY_SERVER_ADDITIONAL_DIRECTIVES }}
     - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"

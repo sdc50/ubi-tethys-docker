@@ -6,8 +6,9 @@ FROM ${BASE_IMAGE}
 ###################
 ARG PYTHON_VERSION=3.*
 ARG RUN_SUPERVISOR_AS_USER="root"
-ARG TETHYS_VERSION="4.0"
-ARG TETHYS_CHANNEL="tethysplatform"
+ARG TETHYS_VERSION="4"
+ARG TETHYS_CHANNEL="conda-forge"
+ARG MICRO_TETHYS=false
 
 ###############
 # ENVIRONMENT #
@@ -142,7 +143,8 @@ RUN rm -f /etc/httpd/conf.d/ssl.conf
 # Setup Conda Environment
 WORKDIR ${TETHYS_HOME}/tethys
 RUN micromamba create -n "${CONDA_ENV_NAME}" --yes -c conda-forge -c ${TETHYS_CHANNEL} \
-    tethys-platform=${TETHYS_VERSION} python=${PYTHON_VERSION} \
+    $(if [ "$MICRO_TETHYS" = false ]; then echo tethys-platform; else echo micro-tethys-platform; fi)=${TETHYS_VERSION} \
+     python=${PYTHON_VERSION} \
  && micromamba clean --all --yes
 
 ###########

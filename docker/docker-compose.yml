@@ -11,9 +11,13 @@ services:
         BASE_IMAGE: harbor.erdc.dren.mil/rad/micromamba
         TETHYS_CHANNEL: tethysplatform
         TETHYS_VERSION: 4
+        MICRO_TETHYS: true
     ports:
       - "80:80"
     environment:
+      TERM: xterm
+      WAIT_FOR_DB: false
+      SKIP_DB_SETUP: true
       TETHYS_DB_SUPERUSER: "tethys_super"
       TETHYS_DB_SUPERUSER_PASS: "pass"
       CLIENT_MAX_BODY_SIZE: "75M"
