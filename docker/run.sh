@@ -81,7 +81,7 @@ if [[ $test = false ]]; then
 fi
 
 echo_status "Enforcing start state... (This might take a bit)"
-salt-call --local state.apply
+salt-call --local --force-color state.apply
 
 if [[ $test = false ]]; then
   if [[ $skip_perm = false ]]; then
@@ -102,6 +102,6 @@ if [[ $test = false ]]; then
 
   # Watch Logs
   echo_status "Watching logs"
-  tail -qF /var/log/supervisor/* /var/log/httpd/* /var/log/tethys/*
+  tail -qF /var/log/supervisor/*.log /var/log/httpd/*_log /var/log/tethys/*.log
 fi
 
