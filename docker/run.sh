@@ -44,6 +44,12 @@ done
 
 echo_status "Starting up..."
 
+# Remove stale pid and lock files that might remain after a host reboot
+/bin/rm -f /run/tethys_asgi*.sock* >/dev/null 2>&1
+/bin/rm -f /run/supervisord.pid >/dev/null 2>&1
+/bin/rm -f /run/supervisor/supervisor.sock >/dev/null 2>&1
+/bin/rm -f /run/httpd/* >/dev/null 2>&1
+
 # Create Salt Config
 echo "file_client: local" > /etc/salt/minion
 echo "postgres.host: '${TETHYS_DB_HOST}'" >> /etc/salt/minion
