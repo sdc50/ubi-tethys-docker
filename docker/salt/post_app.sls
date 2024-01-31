@@ -34,7 +34,7 @@ Persist_Apache_Config_Post_App:
   file.rename:
     - source: {{ TETHYS_HOME }}/tethys_apache.conf
     - name: {{ TETHYS_PERSIST }}/tethys_apache.conf
-    - unless: /bin/bash -c "[ -f "${TETHYS_PERSIST}/tethys_apache.conf" ];"
+    - force: True
 
 Link_Apache_Config_Post_App:
   file.symlink:
