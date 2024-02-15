@@ -138,7 +138,6 @@ Generate_Apache_Settings_TethysCore:
         --ip-address $(hostname -I | awk '{print $1}')
         --overwrite
         {{ PROXY_SERVER_ADDITIONAL_DIRECTIVES }}
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ];"
 
 Generate_SSL_Certificate_Key_Pair_TethysCore:
   cmd.run:
