@@ -92,11 +92,7 @@ salt-call --local --force-color state.apply
 if [[ $test = false ]]; then
   if [[ $skip_perm = false ]]; then
     echo_status "Fixing permissions"
-    find ${STATIC_ROOT} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
-    find ${WORKSPACE_ROOT} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
-    find ${TETHYS_PERSIST} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
-    find ${TETHYSAPP_DIR} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
-    find ${TETHYS_HOME} ! -user ${APACHE_USER} -print0 | xargs -0 -I{} chown ${APACHE_USER}: {}
+    chown -R ${APACHE_USER} ${STATIC_ROOT} ${WORKSPACE_ROOT} ${TETHYS_PERSIST} ${TETHYSAPP_DIR} ${TETHYS_HOME}
   fi
 
   echo_status "Starting supervisor"
