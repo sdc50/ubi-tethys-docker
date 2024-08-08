@@ -199,17 +199,6 @@ Migrate_Database_TethysCore:
     - shell: /bin/bash
     - unless: /bin/bash -c "[ "$SKIP_DB_MIGRATE" = true ];"
 
-Create_Database_Portal_SuperUser_TethysCore:
-  cmd.run:
-    - name: >
-        tethys db createsuperuser
-        {%- if PORTAL_SUPERUSER_NAME and PORTAL_SUPERUSER_PASSWORD %}
-        --pn {{ PORTAL_SUPERUSER_NAME }} --pp {{ PORTAL_SUPERUSER_PASSWORD }}
-        {% endif %}
-        {%- if PORTAL_SUPERUSER_EMAIL %}--pe {{ PORTAL_SUPERUSER_EMAIL }}{% endif %}
-    - shell: /bin/bash
-    - unless: /bin/bash -c "[ -f "{{ TETHYS_PERSIST }}/setup_complete" ] || [ "$SKIP_DB_SETUP" = true ];"
-
 {% if REGISTER_CONTROLLER %}
 Set_Register_Controller_TethysCore:
   cmd.run:
