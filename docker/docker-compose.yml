@@ -11,6 +11,7 @@ services:
         BASE_IMAGE: tethysplatform/ubi-micromamba
         TETHYS_CHANNEL: tethysplatform
         TETHYS_VERSION: 4
+        DJANGO_VERSION: 4.2
         MICRO_TETHYS: true
     ports:
       - "80:80"
