@@ -8,6 +8,7 @@ ARG PYTHON_VERSION=3.*
 ARG RUN_SUPERVISOR_AS_USER="root"
 ARG TETHYS_VERSION="4"
 ARG TETHYS_CHANNEL="conda-forge"
+ARG DJANGO_VERSION=4.2
 ARG MICRO_TETHYS=false
 
 ###############
@@ -142,9 +143,9 @@ RUN rm -f /etc/httpd/conf.d/ssl.conf
 
 # Setup Conda Environment
 WORKDIR ${TETHYS_HOME}/tethys
-RUN micromamba create -n "${CONDA_ENV_NAME}" --yes -c conda-forge -c ${TETHYS_CHANNEL} \
+RUN micromamba create -n "${CONDA_ENV_NAME}" --yes -c ${TETHYS_CHANNEL} -c conda-forge  \
     $(if [ "$MICRO_TETHYS" = false ]; then echo tethys-platform; else echo micro-tethys-platform; fi)=${TETHYS_VERSION} \
-     python=${PYTHON_VERSION} \
+     python=${PYTHON_VERSION} django=${DJANGO_VERSION}\
  && micromamba clean --all --yes
 
 ###########
