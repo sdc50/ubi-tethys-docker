@@ -181,6 +181,7 @@ EXPOSE ${PROXY_SERVER_PORT}
 ###############*
 ADD docker/salt/ /srv/salt/
 ADD docker/run.sh ${TETHYS_HOME}/
+RUN /opt/saltstack/salt/bin/pip install setuptools urllib3 zipp cryptography -U
 
 ########
 # RUN! #

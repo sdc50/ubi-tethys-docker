@@ -100,6 +100,7 @@ fi
 
 echo_status "Enforcing start state... (This might take a bit)"
 salt-call --local --force-color state.apply
+# dnf remove salt -y
 
 if [[ $test = false ]]; then
   if [[ $skip_perm = false ]]; then

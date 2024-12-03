@@ -86,15 +86,15 @@ Generate_Tethys_Settings_TethysCore:
     - name: >
         tethys settings
         --set DEBUG {{ DEBUG }}
-        --set ALLOWED_HOSTS {{ ALLOWED_HOSTS }}
+        --set ALLOWED_HOSTS "{{ ALLOWED_HOSTS }}"
         --set DATABASES.default.ENGINE {{ TETHYS_DB_ENGINE }}
         --set DATABASES.default.NAME {{ TETHYS_DB_NAME }}
         --set DATABASES.default.USER {{ TETHYS_DB_USERNAME }}
-        --set DATABASES.default.PASSWORD {{ TETHYS_DB_PASSWORD }}
+        --set DATABASES.default.PASSWORD "{{ TETHYS_DB_PASSWORD }}"
         --set DATABASES.default.HOST {{ TETHYS_DB_HOST }}
         --set DATABASES.default.PORT {{ TETHYS_DB_PORT }}
         {%- if TETHYS_DB_OPTIONS %}
-        --set DATABASES.default.OPTIONS {{ TETHYS_DB_OPTIONS }}
+        --set DATABASES.default.OPTIONS "{{ TETHYS_DB_OPTIONS }}"
         {%- endif %}
         --set INSTALLED_APPS {{ ADD_DJANGO_APPS }}
         --set SESSION_CONFIG.SECURITY_WARN_AFTER {{ SESSION_WARN }}
