@@ -25,11 +25,6 @@ Collect_Static:
     - name: tethys manage collectstatic --noinput
     - shell: /bin/bash
 
-Collect_Workspaces:
-  cmd.run:
-    - name: tethys manage collectworkspaces
-    - shell: /bin/bash
-
 Persist_Apache_Config_Post_App:
   file.rename:
     - source: {{ TETHYS_HOME }}/tethys_apache.conf
